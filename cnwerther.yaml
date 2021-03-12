@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cnweather
+  namespace: kube-test
+  labels:
+    app: cnweather
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cnweather
+  template:
+    metadata:
+      labels:
+        app: cnweather
+    spec:
+      containers:
+        - name: cnweather
+          image: 172.31.23.153:5000/cnweather:v2.0
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /var/log/mclient
+              name: log-volume
+      volumes:
+        - name: log-volume
+          hostPath:
+            path: /data/hitices/test-dir/log
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cnweather
+  namespace: kube-test
+  labels:
+    app: cnweather
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: cnweather
